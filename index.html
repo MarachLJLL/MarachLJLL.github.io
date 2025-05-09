@@ -1,1 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Luis' Portfolio</title>
+    <link rel="icon" type="" href="">
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&family=Playfair+Display:ital,wght@0,700;1,500&family=Space+Mono:wght@400;700&display=swap">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
 
+<body class="initially-folded">
+    <div id="mouse-key">🔑</div>
+    
+    <div class="loading-screen">
+        <div class="envelope-viewport">
+            <div class="envelope-assembly">
+                <div class="panel panel-top"></div>
+                <div class="panel panel-bottom"></div>
+                <div class="panel panel-left"></div>
+                <div class="panel panel-right"></div>
+
+                <div class="flap flap-top"></div>
+                <div class="flap flap-bottom"></div>
+                <div class="flap flap-left"></div>
+                <div class="flap flap-right"></div>
+
+                <button id="unlock-trigger" class="padlock" aria-label="Unlock">
+                    <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect class="padlock-body" x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                        <g class="padlock-shackle-group">
+                            <path class="padlock-shackle" d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                        </g>
+                        <circle class="padlock-keyhole" cx="12" cy="16" r="1.5" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+    <iframe id="content" src="portfolio.html" width="100%"></iframe>
+
+
+    <script src="script.js"></script>
+</body>
+</html>

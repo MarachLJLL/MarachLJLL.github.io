@@ -1,0 +1,466 @@
+/* --- Theme & Animation Variables --- */
+:root {
+  /* Day Colors */
+  --color-background: #f4f1ea;
+  --color-text: #333333;
+  --color-primary: #2c3e50;
+  --color-secondary: #e74c3c;
+  --color-accent1: #f39c12; /* Yellow/Orange */
+  --color-accent2: #1abc9c; /* Teal */
+  --color-subtle-gray: #e0e0e0;
+
+  --envelope-panel-color: #242b2e;
+  --envelope-flap-background: #78909c;
+  --envelope-flap-border: #546e7a;
+
+  --lock-body-fill: #adb5bd;
+  --lock-shackle-stroke: var(--color-accent1);
+  --lock-keyhole-fill: #343a40;
+
+  /* Fonts */
+  --font-body: 'Inter', sans-serif;
+  --font-headings: 'Inter', serif;
+  --font-mono: 'Space Mono', monospace;
+  --font-ui: 'Inter', sans-serif;
+
+  /* Initial Envelope Dimensions */
+  --envelope-initial-width: 320px;
+  --envelope-initial-height: 240px;
+  --flap-depth-factor: 0.5;
+
+  /* Animation Durations */
+  --padlock-unlock-wiggle-duration: 0.4s;
+  --padlock-shackle-open-duration: 0.6s;
+  --padlock-fade-duration: 0.5s;
+
+  --flap-open-duration: 0.7s;
+  --flap-stagger-js-delay: 100ms;
+
+  --panel-expand-delay-js: 400ms; /* Delay for panels to start expanding after flaps start */
+  --panel-expand-duration: 1.5s;   /* Duration for panel expansion AND for push/slide-off */
+
+  --loading-screen-fade-delay-js: 200ms;
+  --loading-screen-fade-duration: 0.7s;
+
+  --centered-flap-width: 300px;
+  --centered-flap-height: 220px;
+
+  /* Theme Transition Duration */
+  --theme-transition-duration: 0.7s; /* Controls speed of color fade */
+}
+
+/* Night Mode Variables (Muted Day Colors) */
+body.night-mode {
+  --color-background: #344062; /* Dark background */
+  --color-text: #ced4da;     /* Light grey text */
+  --color-primary: #0f141b;   /* Muted primary blue-grey */
+  --color-secondary: #a54a45; /* Muted red */
+  --color-accent1: #d39e00;   /* Muted yellow/orange */
+  --color-accent2: #117a65;   /* Muted teal */
+  --color-subtle-gray: #262c33; /* Darker subtle gray */
+
+  --envelope-panel-color: #495057; /* Match subtle gray */
+  --envelope-flap-background: #5a6268; /* Match muted primary */
+  --envelope-flap-border: #343a40; /* Darker grey */
+
+  --lock-body-fill: #495057; /* Match subtle gray */
+  --lock-shackle-stroke: var(--color-accent1); /* Use muted accent1 */
+  --lock-keyhole-fill: #212529; /* Very dark grey */
+}
+
+
+/* --- General Body & Portfolio --- */
+html { height: 100%; }
+body {
+  margin: 0; padding: 0; width: 100%; min-height: 100vh;
+  font-family: var(--font-body); color: var(--color-text);
+  background-color: var(--color-background);
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  position: relative;
+  /* Add transitions for color variables */
+  transition:
+    background-color var(--theme-transition-duration) ease,
+    color var(--theme-transition-duration) ease;
+}
+body.initially-folded { overflow: hidden; }
+body.unlocked { overflow-y: auto; }
+
+#portfolio-container {
+  width: 100%; min-height: 100vh; box-sizing: border-box;
+  position: relative; z-index: 1; visibility: visible;
+}
+body.initially-folded { pointer-events: none; }
+body.initially-folded .loading-screen,
+body.initially-folded .loading-screen * { pointer-events: auto; }
+body.unlocked { pointer-events: auto; }
+
+/* Apply theme transitions to main elements */
+header, main, footer, nav,
+.content-section, .foldable .foldable-header, .foldable .foldable-content,
+.skill-item, .contact-links a, .contact-links a i {
+    transition:
+      background-color var(--theme-transition-duration) ease,
+      color var(--theme-transition-duration) ease,
+      border-color var(--theme-transition-duration) ease,
+      border-left-color var(--theme-transition-duration) ease; /* For section borders */
+}
+
+/* === Portfolio Content Styles === */
+header { background-color: var(--color-primary); color: var(--color-background); padding: 4rem 2rem 3rem; text-align: center; }
+header h1 { font-family: var(--font-headings); font-size: 3.2rem; font-weight: 700; color: var(--color-background); margin: 0 0 0.5rem; }
+
+/* Style the first tagline's accent text */
+p.tagline {
+  font-size: 20px;
+}
+p.tagline .accent-text {
+    color: var(--color-accent1);
+    transition: color var(--theme-transition-duration) ease;
+}
+
+/* Style the day/night button */
+#day-night-button.tagline {
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  letter-spacing: 1px;
+  cursor: pointer;
+  display: inline-flex; /* Use inline-flex to keep content together and center */
+  align-items: center;
+  gap: 8px; /* Space between icon and text */
+
+  /* Base button style (Day Mode appearance) */
+  background: transparent;
+  border: 1px solid var(--color-accent1); /* Consistent border */
+  color: var(--color-accent1); /* Day text color */
+  padding: 5px 10px; /* Consistent padding */
+  border-radius: 4px;
+  margin: 0.5rem auto 0;
+  /* Use block if you want it centered like the old p tag */
+  /* display: block; */
+
+  transition:
+      color 0.5s ease,
+      background-color 0.5s ease,
+      border-color 0.5s ease,
+      /* Icon color transition */
+      var(--theme-transition-duration) ease; /* General theme transition */
+}
+
+/* Button icon style */
+#day-night-button.tagline i {
+    color: var(--color-accent1); /* Icon color matches button text */
+    transition: color 0.5s ease; /* Smooth transition for icon color */
+}
+
+/* Button hover state (in day mode) */
+#day-night-button.tagline:hover {
+    color: var(--color-background); /* Hover text color */
+    background-color: var(--color-accent1); /* Hover background color */
+    border-color: var(--color-accent1); /* Hover border color */
+}
+
+/* Button hover state (in day mode) - icon color */
+#day-night-button.tagline:hover i {
+    color: var(--color-background); /* Icon color matches hover text */
+}
+
+
+/* Button styles in night mode */
+body.night-mode #day-night-button.tagline {
+    /* Night Mode appearance */
+    background: var(--color-subtle-gray); /* Muted background */
+    border-color: var(--color-primary); /* Muted border color */
+    color: var(--color-text); /* Night text color */
+}
+
+/* Button icon style in night mode */
+body.night-mode #day-night-button.tagline i {
+    color: var(--color-text); /* Icon color matches night button text */
+}
+
+
+/* Button hover state (in night mode) */
+body.night-mode #day-night-button.tagline:hover {
+    /* Hover in Night Mode (looks like day button but with night colors) */
+    color: var(--color-accent1); /* Hover text color */
+    background-color: transparent; /* Transparent background */
+    border-color: var(--color-accent1); /* Hover border color */
+}
+
+/* Button hover state (in night mode) - icon color */
+body.night-mode #day-night-button.tagline:hover i {
+    color: var(--color-accent1); /* Icon color matches hover text */
+}
+
+
+nav { background: rgb(216, 253, 255); border-bottom: 1px solid var(--color-subtle-gray); padding: 1rem 1rem; text-align: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 5px rgba(0,0,0,0.05); line-height: 2rem;}
+/* Adjust nav background/border for night mode */
+body.night-mode nav {
+    background: var(--color-primary); /* Use primary color for night nav */
+    border-bottom-color: var(--color-subtle-gray);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+nav a { font-family: var(--font-ui); font-weight: 700; color: var(--color-primary); text-decoration: none; padding: 0.8rem 1.5rem; margin: 0 0.5rem; border-radius: 4px; transition: color 0.3s ease, background-color 0.3s ease; }
+/* Adjust nav links for night mode */
+body.night-mode nav a { color: var(--color-background); }
+nav a:hover { color: var(--color-background); background-color: var(--color-accent2); }
+/* Adjust nav link hover for night mode */
+body.night-mode nav a:hover { color: var(--color-primary); background-color: var(--color-accent1); }
+
+
+main { padding: 2rem 1.5rem; max-width: 1000px; margin: 2rem auto; }
+
+.content-section {
+  --section-accent-color: var(--color-primary);
+  background: var(--color-background);
+  padding: 2.5rem; margin-bottom: 2.5rem;
+  border-radius: 6px; border: 1px solid var(--color-subtle-gray);
+  border-left: 5px solid var(--section-accent-color);
+}
+/* Adjust content sections for night mode */
+body.night-mode .content-section {
+    background: var(--color-subtle-gray); /* Use subtle gray for night section background */
+    border-color: var(--color-primary); /* Use primary color for borders */
+}
+
+#skills.content-section { --section-accent-color: var(--color-accent2); }
+#experience.content-section { --section-accent-color: var(--color-secondary); }
+#projects.content-section { --section-accent-color: var(--color-accent1); }
+#education.content-section { --section-accent-color: #6a5acd; } /* Custom color */
+#extracurriculars.content-section { --section-accent-color: #20b2aa; } /* Custom color */
+#contact.content-section { --section-accent-color: var(--color-primary); border-left: none; }
+
+
+.content-section h2 {
+  font-family: var(--font-headings); font-style: italic; font-size: 2.2rem;
+  color: var(--color-primary); margin-top: 0; margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem; border-bottom: 2px solid var(--section-accent-color);
+  display: inline-block;
+}
+/* Adjust headings for night mode */
+body.night-mode .content-section h2 { color: var(--color-text); }
+
+.content-section > h3 { font-family: var(--font-ui); font-weight: 700; color: var(--section-accent-color); }
+/* Adjust subheadings for night mode - accent colors are already muted */
+
+
+ul.skills-list { list-style: disc; padding-left: 25px; columns: 2; gap: 20px; }
+ul { list-style: disc; padding-left: 25px; }
+li { margin-bottom: 0.25rem; line-height: 1.2; }
+
+
+.foldable .foldable-header {
+  background-color: transparent; border: 1px solid var(--color-subtle-gray);
+  color: var(--color-text); padding: 1rem 1.5rem; cursor: pointer;
+  border-radius: 4px; margin-bottom: 0;
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+  display: flex; justify-content: space-between; align-items: center;
+}
+/* Adjust foldable header for night mode */
+body.night-mode .foldable .foldable-header {
+    border-color: var(--color-primary);
+    color: var(--color-text);
+}
+.foldable .foldable-header:hover {
+  background-color: var(--section-accent-color); color: var(--color-background);
+  border-color: var(--section-accent-color);
+}
+/* Adjust foldable header hover for night mode */
+body.night-mode .foldable .foldable-header:hover {
+     background-color: var(--section-accent-color); /* Hover accent color remains */
+     color: var(--color-background); /* Still light text on hover */
+     border-color: var(--section-accent-color);
+}
+.foldable .foldable-header > div { flex-grow: 1; margin-right: 15px; }
+.foldable .foldable-header h3 {
+  margin: 0; font-size: 1.1rem; font-family: var(--font-ui);
+  font-weight: 700; color: var(--section-accent-color); transition: color 0.3s ease;
+}
+/* Adjust foldable header h3 for night mode */
+body.night-mode .foldable .foldable-header h3 { color: var(--section-accent-color); } /* Keep accent color */
+
+.foldable .foldable-header:hover h3 { color: var(--color-background); }
+/* Adjust foldable header h3 hover for night mode */
+body.night-mode .foldable .foldable-header:hover h3 { color: var(--color-background); }
+
+
+.foldable .foldable-header p {
+  margin: 0; font-size: 0.8em; color: #777; margin-top: 0.25rem;
+  font-family: var(--font-ui); transition: color 0.3s ease;
+}
+/* Adjust foldable header p for night mode */
+body.night-mode .foldable .foldable-header p { color: var(--color-primary); } /* Muted color for date */
+.foldable .foldable-header:hover p { color: var(--color-subtle-gray); }
+/* Adjust foldable header p hover for night mode */
+body.night-mode .foldable .foldable-header:hover p { color: var(--color-subtle-gray); }
+
+
+.foldable .foldable-content {
+  max-height: 0; overflow: hidden;
+  transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              padding 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background-color: transparent; padding: 0 1.5rem;
+  border: 0px solid var(--color-subtle-gray); border-top: none;
+  border-radius: 0 0 4px 4px; margin-top: -1px;
+}
+/* Adjust foldable content for night mode */
+body.night-mode .foldable .foldable-content {
+    border-color: var(--color-primary);
+}
+.foldable.active .foldable-content {
+  max-height: 3000px; padding: 1.5rem; border-width: 1px;
+  border-color: var(--color-subtle-gray);
+  transition: max-height 0.7s cubic-bezier(0.4, 0, 0.2, 1) 0.05s,
+              padding 0.7s cubic-bezier(0.4, 0, 0.2, 1) 0.05s,
+              border-color 0.7s cubic-bezier(0.4, 0, 0.2, 1) 0.05s;
+  overflow-y: auto;
+}
+/* Adjust active foldable content for night mode */
+body.night-mode .foldable.active .foldable-content {
+     border-color: var(--color-primary);
+}
+
+.foldable .arrow {
+  font-size: 1.2em; color: var(--section-accent-color);
+  transition: transform 0.3s ease, color 0.3s ease; flex-shrink: 0;
+}
+/* Adjust arrow for night mode */
+body.night-mode .foldable .arrow { color: var(--section-accent-color); } /* Keep accent color */
+.foldable.active .arrow { transform: rotate(180deg); }
+.foldable .foldable-header:hover .arrow { color: var(--color-background); }
+/* Adjust arrow hover for night mode */
+body.night-mode .foldable .foldable-header:hover .arrow { color: var(--color-background); }
+
+
+footer {
+  text-align: center; padding: 3rem 1.5rem;
+  background-color: var(--color-primary); color: var(--color-subtle-gray);
+  margin-top: 3rem; font-family: var(--font-mono);
+  display: flex; flex-direction: column; align-items: center;
+}
+/* Adjust footer for night mode */
+body.night-mode footer {
+    background-color: var(--color-text); /* Use night text color for footer bg */
+    color: var(--color-primary); /* Use muted primary for footer text */
+}
+
+footer #contact {
+  padding: 0; margin-bottom: 1.5rem; border: none;
+  background-color: transparent; width: 100%; max-width: 800px;
+}
+footer #contact h2 {
+  font-family: var(--font-headings); font-style: italic; font-size: 2.2rem;
+  color: var(--color-background); margin-top: 0; margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem; border-bottom: 2px solid var(--color-accent1);
+  display: inline-block;
+}
+/* Adjust footer heading for night mode */
+body.night-mode footer #contact h2 {
+    color: var(--color-background); /* Still light text */
+    border-bottom-color: var(--color-accent1); /* Accent color is already muted */
+}
+
+
+.contact-links { display: flex; justify-content: center; gap: 25px; margin-top: 0.5rem; flex-wrap: wrap; }
+.contact-links a {
+  font-family: var(--font-ui); font-size: 1.1rem; color: var(--color-background);
+  text-decoration: none; transition: color 0.3s ease;
+  display: flex; align-items: center;
+}
+/* Adjust contact links for night mode */
+body.night-mode .contact-links a { color: var(--color-background); } /* Muted primary for night links */
+.contact-links a i { margin-right: 8px; color: var(--color-accent2); transition: color 0.3s ease; }
+/* Adjust contact link icons for night mode - accent color is already muted */
+body.night-mode .contact-links a i { color: var(--color-accent2); }
+
+.contact-links a:hover { color: var(--color-accent1); }
+/* Adjust contact links hover for night mode - accent color is already muted */
+body.night-mode .contact-links a:hover { color: var(--color-accent1); }
+
+
+@media (max-width: 768px) {
+  :root {
+      --envelope-initial-width: 280px;
+      --envelope-initial-height: 210px;
+  }
+  header h1 { font-size: 2.5rem; }
+  nav a { margin: 1rem; padding: 0.5rem 1rem; }
+  .content-section { padding: 1.5rem; }
+  .content-section h2 { font-size: 1.8rem; }
+  footer #contact h2 {font-size: 1.8rem; }
+  .contact-links { gap: 15px; }
+  ul.skills-list { columns: 1; }
+  #unlock-trigger.padlock { width: 40px; height: 48px; }
+
+  /* Adjust button font size on smaller screens */
+   #day-night-button.tagline { font-size: 1rem; padding: 4px 8px; }
+   #day-night-button.tagline i { font-size: 1.2rem; } /* Adjust icon size */
+}
+
+/* Existing styles above */
+
+/* --- Skills Grid Styling --- */
+.skills-grid {
+  display: grid;
+  /* Creates columns that are at least 150px wide and adjust to fit the container */
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px; /* Space between grid items */
+  margin-top: 1.5rem; /* Add some space below the section title */
+}
+
+.skill-item {
+  background-color: var(--color-background); /* Use background variable */
+  color: var(--color-text); /* Use text color variable */
+  padding: 10px 15px;
+  border-radius: 20px; /* Rounded corners like the image */
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Space between icon and text */
+  font-family: var(--font-ui); /* Use a suitable font */
+  font-size: 1rem;
+  flex-wrap: nowrap; /* Prevent wrapping of icon and text on small screens */
+  white-space: nowrap; /* Keep text on a single line */
+  overflow: hidden; /* Hide overflow if text is too long */
+  text-overflow: ellipsis; /* Add ellipsis for truncated text */
+  border: 1px solid var(--color-subtle-gray); /* Add a subtle border */
+  transition: background-color var(--theme-transition-duration) ease, color var(--theme-transition-duration) ease, border-color var(--theme-transition-duration) ease;
+}
+/* Adjust skill item background for night mode */
+body.night-mode .skill-item {
+     background-color: var(--color-primary); /* Use muted primary */
+     border-color: var(--color-subtle-gray);
+     color: var(--color-background); /* Use light background for text */
+}
+
+
+.skill-item i {
+  font-size: 1.5rem; /* Icon size */
+  color: var(--color-accent2); /* Icon color (match text color) */
+  flex-shrink: 0; /* Prevent the icon from shrinking */
+  transition: color var(--theme-transition-duration) ease;
+}
+/* Adjust skill icon color for night mode - accent color is already muted */
+body.night-mode .skill-item i { color: var(--color-accent2); }
+
+
+/* Add some specific adjustments for smaller screens if needed */
+@media (max-width: 600px) {
+  .skills-grid {
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); /* Make items a bit smaller */
+      gap: 10px;
+  }
+
+  .skill-item {
+      padding: 8px 12px;
+      font-size: 0.9rem;
+      gap: 8px;
+  }
+
+  .skill-item i {
+       font-size: 1.3rem;
+  }
+}
+
+/* Existing styles below */

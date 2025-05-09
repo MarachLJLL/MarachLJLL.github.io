@@ -1,0 +1,244 @@
+/* --- Theme & Animation Variables --- */
+:root {
+    /* Colors */
+    --color-background: #f4f1ea;
+    --color-text: #333333;
+    --color-primary: #2c3e50;
+    --color-secondary: #e74c3c;
+    --color-accent1: #f39c12;
+    --color-accent2: #1abc9c;
+    --color-subtle-gray: #e0e0e0;
+  
+    --envelope-panel-color: #131111;
+    --envelope-flap-background: #78909c;
+    --envelope-flap-border: #546e7a;
+  
+    --lock-body-fill: #adb5bd;
+    --lock-shackle-stroke: var(--color-accent1);
+    --lock-keyhole-fill: #343a40;
+  
+    /* Fonts */
+    --font-body: 'Inter', sans-serif;
+    --font-headings: 'Playfair Display', serif;
+    --font-mono: 'Space Mono', monospace;
+    --font-ui: 'Inter', sans-serif;
+  
+    /* Initial Envelope Dimensions */
+    --envelope-initial-width: 320px;
+    --envelope-initial-height: 240px;
+    --flap-depth-factor: 0.5;
+  
+    /* Animation Durations */
+    --padlock-unlock-wiggle-duration: 0.4s;
+    --padlock-shackle-open-duration: 0.6s;
+    --padlock-fade-duration: 0.5s;
+  
+    --flap-open-duration: 0.7s;
+    --flap-stagger-js-delay: 100ms;
+  
+    --panel-expand-delay-js: 400ms; /* Delay for panels to start expanding after flaps start */
+    --panel-expand-duration: 1.5s;   /* Duration for panel expansion AND for push/slide-off */
+  
+    --loading-screen-fade-delay-js: 200ms;
+    --loading-screen-fade-duration: 0.7s;
+  
+    --centered-flap-width: 300px;
+    --centered-flap-height: 220px;
+  }
+  
+  /* --- General Body & Portfolio --- */
+  html { height: 100%; }
+  body {
+    margin: 0; padding: 0; width: 100%; min-height: 100vh;
+    font-family: var(--font-body); color: var(--color-text);
+    background-color: var(--color-background);
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+    position: relative;
+  }
+  body.initially-folded { overflow: hidden; }
+  body.unlocked { overflow-y: auto; }
+  
+  #portfolio-container {
+    width: 100%; min-height: 100vh; box-sizing: border-box;
+    position: relative; z-index: 1; visibility: visible;
+  }
+  body.initially-folded { pointer-events: none; }
+  body.initially-folded .loading-screen,
+  body.initially-folded .loading-screen * { pointer-events: auto; }
+  body.unlocked { pointer-events: auto; }
+  
+  /* --- Mouse Key Follower --- */
+  #mouse-key {
+    position: fixed; font-size: 2rem; pointer-events: none;
+    transform: translate(-50%, -50%); transition: opacity 0.3s ease;
+    z-index: 9999; opacity: 0;
+  }
+  body.initially-folded #mouse-key.visible { opacity: 1; }
+  
+  /* --- Loading Screen --- */
+  .loading-screen {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
+    background-color: transparent;
+    display: flex; justify-content: center; align-items: center;
+    z-index: 5000; opacity: 1; visibility: visible;
+    transition: opacity var(--loading-screen-fade-duration) ease,
+                visibility 0s linear var(--loading-screen-fade-duration);
+  }
+
+  .loading-screen .envelope-viewport {
+    /* Override parent's align-items: center */
+    margin-bottom: auto; /* Push it to the top */
+    margin-top: 50px; /* Add some space from the top edge */
+
+    /* Keep horizontal centering from parent's justify-content: center */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+  body.unlocked .loading-screen.fade-out-active {
+    opacity: 1; /* fully visible */
+    visibility: visible; /* MUST be visible to render */
+    pointer-events: none; /* disables clicking */
+  }
+  
+  /* When fading out */
+  .loading-screen.fade-out-active {
+    opacity: 0;
+    pointer-events: none; /* <-- disables blocking */
+  }
+  
+  /* Ensure children also don’t block */
+  .loading-screen.fade-out-active * {
+    pointer-events: none;
+  }
+  
+  
+  /* --- Envelope Viewport & Assembly --- */
+  .envelope-viewport {
+    position: relative;
+    width: var(--envelope-initial-width);
+    height: var(--envelope-initial-height);
+    perspective: 1200px;
+  }
+  .envelope-assembly {
+    position: absolute; top:0; left:0; width: 100%; height: 100%;
+    transform-style: preserve-3d;
+  }
+  
+  /* --- Envelope Panels --- */
+  .panel {
+    position: absolute;
+    background-color: var(--envelope-panel-color);
+    z-index: 4; /* Base z-index for panels */
+    opacity: 1; /* Panels start opaque */
+    /* Default transition for transform. Opacity transition handled by .slide-off specific rule. */
+    transition: transform var(--panel-expand-duration) cubic-bezier(0.77, 0, 0.175, 1);
+  }
+  
+  /* INITIAL STATE: Panels are OFF-SCREEN (MODIFIED: add translateZ(0px)) */
+  .panel-top {
+    bottom: 100%; right: -10000px; width: 20000px; height: 20000px;
+    transform-origin: center bottom; z-index: 5; /* z-index 5 for top/bottom, but still behind flaps due to translateZ */
+  }
+  .panel-bottom {
+    top: 100%; left: -10000px; width: 20000px; height: 20000px;
+    transform-origin: center top; z-index: 5;
+  }
+  .panel-left {
+    top: -10000px; height: 20000px; right: 100%; width: 20000px;
+    transform-origin: right center;
+  }
+  .panel-right {
+    bottom: -10000px; height: 20000px; left: 100%; width: 20000px;
+    transform-origin: left center;
+  }
+  
+  /* State when ".expanded" is added by JS (MODIFIED: add translateZ(0px)) */
+  /* This class IS NOW USED AGAIN by JS */
+  
+  
+  /* State when ".slide-off" is added by JS (MODIFIED for push and instant opacity change) */
+  .panel.slide-off {
+    opacity: 0; /* Target opacity: 0 after push */
+    /*
+      Transition for transform happens over --panel-expand-duration.
+      Transition for opacity is 0s (instant) but DELAYED by --panel-expand-duration.
+      So, opacity snaps to 0 only AFTER the transform (push) animation completes.
+    */
+    transition: transform var(--panel-expand-duration) cubic-bezier(0.77, 0, 0.175, 1),
+                opacity 0s linear var(--panel-expand-duration);
+  }
+  
+  /* Define the PUSHED-OFF positions (MODIFIED: ensure translateZ and use vh/vw for push distance) */
+  /* These transforms are from the .expanded (translate(0,0) translateZ(0px)) state */
+  .panel-top.slide-off    { transform: translateY(-100vh) translateZ(0px); } /* Pushes far UP */
+  .panel-bottom.slide-off { transform: translateY(100vh) translateZ(0px); }  /* Pushes far DOWN */
+  .panel-left.slide-off   { transform: translateX(-100vw) translateZ(0px); } /* Pushes far LEFT */
+  .panel-right.slide-off  { transform: translateX(100vw) translateZ(0px); }  /* Pushes far RIGHT */
+  
+  /* --- Flaps --- */
+  .flap {
+    position: absolute;
+    background-color: var(--envelope-flap-background);
+    transition: transform var(--flap-open-duration) cubic-bezier(0.68, -0.55, 0.265, 1.55),
+                opacity var(--flap-open-duration) ease; /* Base transition for opening */
+    z-index: 0; /* Flaps on top */
+  }
+  .flap-top { width: 100%; height: calc(var(--envelope-initial-height) * var(--flap-depth-factor)); top: 0; left: 0; clip-path: polygon(0% 0%, 100% 0%, 50% 100%); transform-origin: 50% 0%; }
+  .flap-bottom { width: 100%; height: calc(var(--envelope-initial-height) * var(--flap-depth-factor)); bottom: 0; left: 0; clip-path: polygon(50% 0%, 0% 100%, 100% 100%); transform-origin: 50% 100%; }
+  .flap-left { width: calc(var(--envelope-initial-width) * var(--flap-depth-factor)); height: 100%; top: 0; left: 0; clip-path: polygon(0% 0%, 100% 50%, 0% 100%); transform-origin: 0% 50%; }
+  .flap-right { width: calc(var(--envelope-initial-width) * var(--flap-depth-factor)); height: 100%; top: 0; right: 0; clip-path: polygon(0% 50%, 100% 0%, 100% 100%); transform-origin: 100% 50%; }
+  
+  /* Flap open states (MODIFIED: add translateZ(5px) for layering) */
+  .flap-top.open { transform: rotateX(-180deg) translateZ(5px); }
+  .flap-bottom.open { transform: rotateX(180deg) translateZ(5px); }
+  .flap-left.open { transform: rotateY(180deg) translateZ(5px); }
+  .flap-right.open { transform: rotateY(-180deg) translateZ(5px); }
+  
+  /* Flap class for sliding off (MODIFIED: ensure translateZ(5px) is maintained) */
+  /* Flaps will still fade out as they slide */
+  .flap.sliding-off {
+      opacity: 0;
+      transition: transform var(--panel-expand-duration) cubic-bezier(0.77, 0, 0.175, 1), /* Same duration as panel push-off */
+                  opacity calc(var(--panel-expand-duration) * 0.8) ease; /* Flaps fade while sliding */
+  }
+  
+  /* Flap slide-off transformations (MODIFIED: add translateZ(5px)) */
+  .flap-top.open.sliding-off    {transform: translateY(-150vh); }
+  .flap-bottom.open.sliding-off {transform: translateY(150vh); }
+  .flap-left.open.sliding-off   {transform: translateX(-150vw); }
+  .flap-right.open.sliding-off  {transform: translateX(150vw); }
+  
+  /* --- Padlock --- */
+  #unlock-trigger.padlock {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 45px; height: 54px; background: none; border: none; padding: 0;
+    cursor: pointer; z-index: 30; /* Padlock on very top */
+    transition: transform var(--padlock-unlock-wiggle-duration) ease, opacity var(--padlock-fade-duration) ease;
+  }
+  #unlock-trigger.padlock svg { width: 100%; height: 100%; display: block; overflow: visible; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4)); }
+  #unlock-trigger.padlock .padlock-body { fill: var(--lock-body-fill); }
+  #unlock-trigger.padlock .padlock-shackle { stroke: var(--lock-shackle-stroke); fill: none; stroke-width: 2.5; }
+  #unlock-trigger.padlock .padlock-keyhole { fill: var(--lock-keyhole-fill); stroke: none;}
+  .padlock-shackle-group { transform-origin: 7px 11px; transition: transform var(--padlock-shackle-open-duration) cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+  #unlock-trigger.padlock.shackle-open .padlock-shackle-group { transform: rotate(-45deg) translateY(-2px) translateX(1px); }
+  #unlock-trigger.padlock:hover { transform: translate(-50%, -50%) scale(1.1); }
+  #unlock-trigger.padlock.unlocking { animation: padlock-wiggle var(--padlock-unlock-wiggle-duration) ease-in-out; }
+  @keyframes padlock-wiggle {0%{transform:translate(-50%,-50%) scale(1) rotate(0deg)}25%{transform:translate(-50%,-50%) scale(1.05) rotate(-3deg)}50%{transform:translate(-50%,-50%) scale(1.05) rotate(3deg)}75%{transform:translate(-50%,-50%) scale(1.05) rotate(-2deg)}100%{transform:translate(-50%,-50%) scale(1) rotate(0deg)}}
+  #unlock-trigger.padlock.fade-out { opacity: 0; transform: translate(-50%, -55%) scale(0.8); }
+    
+  @media (max-width: 768px) {
+    :root {
+        --envelope-initial-width: 280px;
+        --envelope-initial-height: 210px;
+    }
+    header h1 { font-size: 2.5rem; }
+    nav a { margin: 0.25rem; padding: 0.7rem 1rem; }
+    .content-section { padding: 1.5rem; }
+    .content-section h2 { font-size: 1.8rem; }
+    footer #contact h2 {font-size: 1.8rem; }
+    .contact-links { gap: 15px; }
+    ul.skills-list { columns: 1; }
+    #unlock-trigger.padlock { width: 40px; height: 48px; }
+  }
